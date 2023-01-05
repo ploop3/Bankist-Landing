@@ -68,3 +68,29 @@ tabsContainer.addEventListener('click', function(e){
 
 
 });
+
+/*
+  Nav bar Fade animation
+  When we over the mouse over one of the links from the navigation bar, that link will keep the opacity and the rest will fade(decrease opacity)
+*/
+
+const nav = document.querySelector('.nav');
+
+
+const handleOver = function(e){
+  if(e.target.classList.contains('nav__link')){
+    const link = e.target;
+    const siblings = link.closest('.nav').querySelectorAll('.nav__link');
+    const logo = link.closest('.nav').querySelector('img');
+
+    siblings.forEach(el => {
+      if(el !== link)
+        el.style.opacity = this;
+    })
+    logo.style.opacity = this;
+  }
+};
+
+//Using .bind() to pass additional arguments, because the listener handler function can only have one (Event).
+nav.addEventListener('mouseover', handleOver.bind(0.5));
+nav.addEventListener('mouseout', handleOver.bind(1));
