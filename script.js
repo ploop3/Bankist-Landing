@@ -94,3 +94,80 @@ const handleOver = function(e){
 //Using .bind() to pass additional arguments, because the listener handler function can only have one (Event).
 nav.addEventListener('mouseover', handleOver.bind(0.5));
 nav.addEventListener('mouseout', handleOver.bind(1));
+
+/*
+  Set the nav bar sticky when we scroll down and the section1 is visible in the viewport  
+*/
+
+const header = document.querySelector('.header');
+const navHeight = nav.getBoundingClientRect().height;
+
+const stickyNav = function(entries){
+  const [entry] = entries; //same as entries[0]
+  if(!entry.isIntersecting)
+    nav.classList.add('sticky');
+  else
+    nav.classList.remove('sticky');
+}
+
+const obsOptions = {
+	root: null, //To listen when the target interacts with the VIEWPORT
+	threshold: 0,
+  rootMargin: `-${navHeight}px`,
+}
+
+const headerObserver = new IntersectionObserver(stickyNav, obsOptions);
+headerObserver.observe(header);
+
+/*
+  Review Elements/sections as we scroll close to them
+*/
+const allSections = document.querySelectorAll('.section');
+
+const revealSection = function(entries, observer){
+  const entry = entries[0];
+  if(!entry.isIntersecting) return;
+
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+}
+
+const sectionObserver = new IntersectionObserver(revealSection, {
+  root: null,
+  threshold: 0.15,
+});
+
+allSections.forEach(section => {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden'); //Will hide them at the start
+});
+
+/*
+  Lazy loading images to increase performance
+  Load a low res image first and load the high res until we scroll there
+  The current image, src, will be replaced with the one referred from data-src 
+*/
+//images that contain a property data-src
+const imgTargets = document.querySelectorAll('img[data-src]'); 
+
+const loadImg = function(entries, observer){
+  const [entry] = entries;
+  if(!entry.isIntersecting) return;
+
+  //Replace src with data-src
+  entry.target.src = entry.target.dataset.src;
+
+  //Remove the blur filter, but only until the new one is downloaded (load event)
+  entry.target.addEventListener('load', function(){
+    entry.target.classList.remove('lazy-img');
+  });
+  observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0,
+  rootMargin: '200px', //To start downloading them before the image reaches the viewport
+});
+
+imgTargets.forEach(img => imgObserver.observe(img));
